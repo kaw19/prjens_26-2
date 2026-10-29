@@ -1,0 +1,43 @@
+# 1. Divisão em Treino (75% = 150 amostras) e Teste (25% = 50 amostras)
+X_treino, X_teste, y_treino, y_teste = train_test_split(
+    X_motor, 
+    y_motor, 
+    test_size=0.25, 
+    random_state=42
+)
+
+# 2. Instanciação e Treinamento da Árvore de Decisão (Profundidade = 2)
+clf_motor = tree.DecisionTreeClassifier(criterion='entropy', max_depth=2, random_state=42)
+clf_motor.fit(X_treino, y_treino)
+
+# 3. Avaliação de Acurácia no Conjunto de Teste
+y_previsto = clf_motor.predict(X_teste)
+print(f"Acurácia no Conjunto de Teste: {metrics.accuracy_score(y_teste, y_previsto):.2%}")
+print("Matriz de Confusão (Teste):\n", metrics.confusion_matrix(y_teste, y_previsto))
+
+# 4. Plotagem da Árvore Traduzida para Português
+fig, ax = plt.subplots(figsize=(14, 7))
+
+anotacoes = tree.plot_tree(
+    clf_motor,
+    feature_names=nomes_sensores,
+    class_names=['Normal (0)', 'Manutenção (1)'],
+    filled=True,
+    rounded=True,
+    fontsize=10,
+    ax=ax
+)
+
+for obj_texto in anotacoes:
+    txt = obj_texto.get_text()
+    txt = txt.replace('entropy =', 'Entropia =')
+    txt = txt.replace('samples =', 'Amostras no nó =')
+    txt = txt.replace('value =', '[Normal, Falha] =')
+    txt = txt.replace('class =', 'Diagnóstico =')
+    txt = txt.replace('True', 'Verdadeiro (Sim)')
+    txt = txt.replace('False', 'Falso (Não)')
+    obj_texto.set_text(txt)
+
+plt.title("Árvore de Decisão — Diagnóstico de Manutenção Preditiva (N = 150 motores no treino)", fontsize=13, fontweight='bold')
+plt.tight_layout()
+plt.show()
