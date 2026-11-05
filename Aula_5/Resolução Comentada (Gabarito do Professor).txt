@@ -1,0 +1,32 @@
+# 1. Divisão em Treinamento (75%) e Teste (25%)
+X_tr, X_te, y_tr, y_te = train_test_split(X_concreto, y_concreto, test_size=0.25, random_state=42)
+
+# 2. Padronização das escalas com StandardScaler
+scaler_X = StandardScaler().fit(X_tr)
+scaler_y = StandardScaler().fit(y_tr.reshape(-1, 1))
+
+X_tr_scaled = scaler_X.transform(X_tr)
+y_tr_scaled = scaler_y.transform(y_tr.reshape(-1, 1)).ravel()
+
+X_te_scaled = scaler_X.transform(X_te)
+y_te_scaled = scaler_y.transform(y_te.reshape(-1, 1)).ravel()
+
+# 3 e 4. Treinamento e Avaliação (R²) dos 3 Regressores no Conjunto de Teste
+regressores = [
+    ("1. SGDRegressor (Modelo Linear)", SGDRegressor(loss='squared_error', random_state=42)),
+    ("2. SVR (SVM com Kernel RBF)", SVR(kernel='rbf')),
+    ("3. ExtraTreesRegressor (10 Árvores)", ExtraTreesRegressor(n_estimators=10, random_state=42))
+]
+
+print("=== COMPARAÇÃO DO COEFICIENTE DE DETERMINAÇÃO (R²) NO TESTE ===")
+for nome, modelo in regressores:
+    modelo.fit(X_tr_scaled, y_tr_scaled)
+    y_pred = modelo.predict(X_te_scaled)
+    r2 = metrics.r2_score(y_te_scaled, y_pred)
+    print(f"{nome:<38} | R² no Teste: {r2:.3f} ({r2*100:.1f}%)")
+
+# Exibindo a importância das variáveis calculada pelo ExtraTreesRegressor
+clf_floresta = regressores[2][1]
+print("\n=== IMPORTÂNCIA DE CADA VARIÁVEL NA RESISTÊNCIA DO MATERIAL ===")
+for peso, var in sorted(zip(clf_floresta.feature_importances_, nomes_variaveis)):
+    print(f"{var:<15} -> Importância: {peso:.3f} ({peso*100:.1f}%)")
