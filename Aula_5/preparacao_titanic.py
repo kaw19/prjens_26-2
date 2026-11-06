@@ -24,7 +24,6 @@ with open(caminho_csv, 'r', encoding='utf-8') as csvfile:
 idades = titanic_X[:, 1]
 idade_med = np.mean(titanic_X[idades != '', 1].astype(float))
 titanic_X[titanic_X[:, 1] == '', 1] = idade_med
-
 titanic_X[:, 2] = LabelEncoder().fit_transform(titanic_X[:, 2])
 
 int_classes = LabelEncoder().fit_transform(titanic_X[:, 0]).reshape(-1, 1)
